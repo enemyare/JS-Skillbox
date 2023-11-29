@@ -1,0 +1,32 @@
+.game{
+    width: 1000px;
+    margin:0 auto ;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 50px;
+}
+
+.card{
+    width: 200px;
+    height: 200px;
+    font-size: 0;
+    background-color: rgb(135, 210, 222);
+    text-align: center;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    line-height: 200px;
+    
+}
+
+.open{
+    background-color: rgb(217, 219, 205); 
+    font-size: 60px;
+}
+
+
+.success{ 
+    font-size: 60px;
+    background-color: rgb(100, 188, 100);
+}
