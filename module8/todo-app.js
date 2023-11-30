@@ -1,4 +1,7 @@
 (function () {
+
+    let itemArray = [],
+        listName = ''
     //создаём и возвращаем заголовок приложения
     function createAppTitle(title) {
         let appTitle = document.createElement("h2");
@@ -54,7 +57,7 @@
         return list;
     }
 
-    function createTodoItem(name) {
+    function createTodoItem(obj) {
         let item = document.createElement("li");
         let buttonGroup = document.createElement("div");
         let doneButton = document.createElement("button");
@@ -66,13 +69,33 @@
             "justify-content-between",
             "align-items-center"
         );
-        item.textContent = name;
+        item.textContent = obj.name;
 
         buttonGroup.classList.add("btn-group", "btn-group-sm");
         doneButton.classList.add("btn", "btn-success");
         doneButton.textContent = "Готово";
         deleteButton.classList.add("btn", "btn-danger");
         deleteButton.textContent = "Удалить";
+
+        if (obj.done == true) item.classList.add('list-group-item-success')
+        doneButton.addEventListener('click', function(){
+            item.classList.toggle('list-group-item-success')
+            for (const listItem of itemArray) {
+                if (listItem.id == obj.id) listItem.done = !listItem.done
+            }
+            saveList(itemArray, listName)
+        })
+
+        deleteButton.addEventListener('click', function(){
+            if (confirm("Вы уверены?")){
+                item.remove()
+
+                for (let i = 0; i < itemArray.length; i++) {
+                    if (itemArray[i].id == obj.id) itemArray.splice(i,1)
+                }
+                saveList(itemArray, listName)
+            }
+        })
 
         buttonGroup.append(doneButton);
         buttonGroup.append(deleteButton);
@@ -85,23 +108,40 @@
         };
     }
 
-    function createTodoApp(container, title = "Список дел"){
+    function createId(arr){
+        let max = 0
+        for (const item of arr) {
+            if (item.id > max) max = item.id 
+        }
+        return max+1
+    }
+    
+    function saveList(arr,keyName){
+        localStorage.setItem(keyName, JSON.stringify(arr))
+    }
+
+    function createTodoApp(container, title = "Список дел", keyName){
    
         let todoAppTitle = createAppTitle(title);
         let todoItemForm = createTodoItemForm();
         let todoList = createTodoList();
 
+        listName=keyName
+
         container.append(todoAppTitle);
         container.append(todoItemForm.form);
         container.append(todoList);
  
-        let todoItemList = [
-            {
-                id: "1",
-                name: "купить хлеб",
-                done: "true"
-            },
-        ]
+        let localData = localStorage.getItem(listName)
+
+        if (localData !== null && localData !==''){
+            itemArray = JSON.parse(localData)
+        }
+
+        for (const itemList of itemArray){
+            let todoItem = createTodoItem(itemList)
+            todoList.append(todoItem.item)
+        }
 
         todoItemForm.form.addEventListener("submit", function (e) {
             e.preventDefault();
@@ -110,26 +150,25 @@
                 return;
             }
 
-            let todoItem = createTodoItem(todoItemForm.input.value)
+            let newItem = {
+                id: createId(itemArray),
+                name: todoItemForm.input.value,
+                done: false,
+            }
+            
+            let todoItem = createTodoItem(newItem)
+
+            itemArray.push(newItem)
+
+            saveList(itemArray, listName)
+            
+            todoList.append(todoItem.item)
 
             todoItemForm.button.disabled = true
-
-            todoItem.doneButton.addEventListener('click', function(){
-                todoItem.item.classList.toggle('list-group-item-success')
-            })
-
-            todoItem.deleteButton.addEventListener('click', function(){
-                if (confirm("Вы уверены?")){
-                    todoItem.item.remove()
-                }
-            })
-
-
-
-            todoList.append(todoItem.item)
             todoItemForm.input.value = "";
         });
     }
 
     window.createTodoApp = createTodoApp;
 })();
+
